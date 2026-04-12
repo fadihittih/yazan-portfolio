@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #090D0A;
+  --surface: #111A12;
+  --accent: #7AAB82;
+  --text: #DDE8DC;
+  --muted: #4A6050;
+  --border: #151E16;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+/* ── Hero photo grid ─────────────────────────────────────────────────────────
+   Mobile: single full-width portrait image.
+   md+:    three-column mosaic (2fr | 1fr | 1fr).               */
+
+.hero-grid {
+  display: grid;
+  gap: 3px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .hero-grid {
+    grid-template-columns: 2fr 1fr 1fr;
+  }
+}
+
+/* Left (primary) hero cell */
+.hero-cell-left {
+  position: relative;
+  aspect-ratio: 3 / 2; /* landscape on mobile */
+}
+
+@media (min-width: 768px) {
+  .hero-cell-left {
+    aspect-ratio: unset;
+    grid-row: span 2;
+  }
+}
