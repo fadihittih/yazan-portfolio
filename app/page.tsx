@@ -371,11 +371,13 @@ export default function Home() {
         </h2>
         <div className="flex flex-col items-end gap-5">
           <a
-            href="mailto:hello@yazankhalil.com"
+            href="https://instagram.com/yazan_.tahseen"
+            target="_blank"
+            rel="noopener noreferrer"
             className="font-jost font-extralight uppercase"
             style={{ color: "var(--muted)", fontSize: "10px", letterSpacing: "4px" }}
           >
-            hello@yazankhalil.com
+            @yazan_.tahseen
           </a>
           <Link
             href="/contact"

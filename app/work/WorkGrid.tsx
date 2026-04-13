@@ -40,20 +40,50 @@ export default function WorkGrid({ items }: { items: Photo[] }) {
         }
       );
 
-      // GSAP hover: image scale + overlay fade
+      // Cursor-aware hover: subtle zoom + lightweight frame.
+      const cleanups: Array<() => void> = [];
       els.forEach((item) => {
         const img = item.querySelector("img");
-        const overlay = item.querySelector<HTMLElement>(".work-overlay");
+        const frame = item.querySelector<HTMLElement>(".work-frame");
 
-        item.addEventListener("mouseenter", () => {
-          if (img) gsap.to(img, { scale: 1.04, duration: 0.6, ease: "power2.out" });
-          if (overlay) gsap.to(overlay, { opacity: 1, duration: 0.3, ease: "power2.out" });
-        });
-        item.addEventListener("mouseleave", () => {
-          if (img) gsap.to(img, { scale: 1, duration: 0.5, ease: "power2.out" });
-          if (overlay) gsap.to(overlay, { opacity: 0, duration: 0.25, ease: "power2.in" });
+        const handleMove = (e: MouseEvent) => {
+          if (!img) return;
+          const rect = item.getBoundingClientRect();
+          const x = ((e.clientX - rect.left) / rect.width) * 100;
+          const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+          gsap.to(img, {
+            transformOrigin: `${x}% ${y}%`,
+            duration: 0.2,
+            ease: "power2.out",
+            overwrite: true,
+          });
+        };
+
+        const handleEnter = () => {
+          if (img) gsap.to(img, { scale: 1.055, duration: 0.45, ease: "power2.out" });
+          if (frame) gsap.to(frame, { opacity: 1, duration: 0.25, ease: "power2.out" });
+        };
+
+        const handleLeave = () => {
+          if (img) gsap.to(img, { scale: 1, duration: 0.45, ease: "power2.out" });
+          if (frame) gsap.to(frame, { opacity: 0, duration: 0.2, ease: "power2.in" });
+        };
+
+        item.addEventListener("mousemove", handleMove);
+        item.addEventListener("mouseenter", handleEnter);
+        item.addEventListener("mouseleave", handleLeave);
+
+        cleanups.push(() => {
+          item.removeEventListener("mousemove", handleMove);
+          item.removeEventListener("mouseenter", handleEnter);
+          item.removeEventListener("mouseleave", handleLeave);
         });
       });
+
+      return () => {
+        cleanups.forEach((cleanup) => cleanup());
+      };
     }, gridRef);
 
     return () => ctx.revert();
@@ -89,24 +119,14 @@ export default function WorkGrid({ items }: { items: Photo[] }) {
             style={{ objectFit: "cover", objectPosition: "center 20%" }}
           />
           <div
-            className="work-overlay absolute inset-0"
-            style={{ background: "rgba(9,13,10,0.62)", opacity: 0 }}
-          >
-            <div className="absolute bottom-0 left-0 right-0 p-6">
-              <span
-                className="font-jost font-extralight uppercase block mb-2"
-                style={{ color: "var(--muted)", fontSize: "10px", letterSpacing: "4px" }}
-              >
-                {photo.series}
-              </span>
-              <span
-                className="font-cormorant font-light block"
-                style={{ fontSize: "22px", color: "var(--text)" }}
-              >
-                {photo.title}
-              </span>
-            </div>
-          </div>
+            className="work-frame absolute inset-[10px]"
+            style={{
+              border: "1px solid rgba(196, 166, 108, 0.45)",
+              boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)",
+              opacity: 0,
+              pointerEvents: "none",
+            }}
+          />
         </div>
       ))}
     </div>

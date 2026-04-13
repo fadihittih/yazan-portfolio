@@ -19,10 +19,9 @@ export default function AboutPage() {
     gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
-
-      // ── Section titles: clip-path reveal on scroll ─────────────────────────
       gsap.utils.toArray<HTMLElement>(".section-title").forEach((el) => {
-        gsap.fromTo(el,
+        gsap.fromTo(
+          el,
           { clipPath: "inset(0 100% 0 0)" },
           {
             clipPath: "inset(0 0% 0 0)",
@@ -33,13 +32,13 @@ export default function AboutPage() {
         );
       });
 
-      // ── Pullquote: fade + y on scroll ─────────────────────────────────────
-      gsap.fromTo(".about-pullquote",
-        { y: 20, opacity: 0 },
+      gsap.fromTo(
+        ".about-pullquote",
+        { y: 24, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          duration: 0.9,
+          duration: 0.7,
           ease: "power2.out",
           scrollTrigger: {
             trigger: ".about-pullquote",
@@ -49,8 +48,8 @@ export default function AboutPage() {
         }
       );
 
-      // ── CTA row: fade on scroll ────────────────────────────────────────────
-      gsap.fromTo(".about-cta-row",
+      gsap.fromTo(
+        ".about-cta-row",
         { opacity: 0 },
         {
           opacity: 1,
@@ -64,10 +63,8 @@ export default function AboutPage() {
         }
       );
 
-      // ── Hero image parallax: y(-20) → y(20), scrub ────────────────────────
-      // The .about-parallax wrapper is 40px taller than its container
-      // (top: -20, bottom: -20) giving room for the ±20px movement.
-      gsap.fromTo(".about-parallax",
+      gsap.fromTo(
+        ".about-parallax",
         { y: -20 },
         {
           y: 20,
@@ -80,7 +77,6 @@ export default function AboutPage() {
           },
         }
       );
-
     }, pageRef);
 
     return () => ctx.revert();
@@ -88,37 +84,34 @@ export default function AboutPage() {
 
   return (
     <div ref={pageRef}>
-
-      {/* ══════════════════════════════════════════════════
-          HERO — full-width, no horizontal padding, 3:2
-      ══════════════════════════════════════════════════ */}
-      <div
-        className="about-hero-container relative w-full overflow-hidden"
-        style={{ aspectRatio: "3/2", background: "var(--surface)" }}
-      >
-        {/* Parallax inner: extends 20px beyond container top + bottom */}
+      <section className="px-8 md:px-16 pt-10 md:pt-14 pb-8 md:pb-12">
         <div
-          className="about-parallax absolute"
-          style={{ top: -20, bottom: -20, left: 0, right: 0 }}
+          className="about-hero-container relative mx-auto w-full max-w-5xl overflow-hidden rounded-[28px] border"
+          style={{
+            height: "clamp(320px, 52vw, 560px)",
+            background: "var(--surface)",
+            borderColor: "var(--border)",
+          }}
         >
-          <Image
-            src={photographerPortrait.src}
-            fill
-            priority
-            alt={photographerPortrait.alt}
-            sizes="100vw"
-            placeholder="blur"
-            blurDataURL={BLUR_DATA_URL}
-            style={{ objectFit: "cover", objectPosition: "center 20%" }}
-          />
+          <div
+            className="about-parallax absolute"
+            style={{ top: -20, bottom: -20, left: 0, right: 0 }}
+          >
+            <Image
+              src={photographerPortrait.src}
+              fill
+              priority
+              alt={photographerPortrait.alt}
+              sizes="100vw"
+              placeholder="blur"
+              blurDataURL={BLUR_DATA_URL}
+              style={{ objectFit: "cover", objectPosition: "center 16%" }}
+            />
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* ══════════════════════════════════════════════════
-          BIO
-      ══════════════════════════════════════════════════ */}
       <section className="px-8 md:px-16 pt-20 pb-16">
-        {/* Name — section-title gets clip-path reveal via ScrollTrigger */}
         <div className="mb-14">
           <p
             className="font-jost font-extralight uppercase mb-6"
@@ -139,10 +132,8 @@ export default function AboutPage() {
           </h1>
         </div>
 
-        {/* Rule */}
         <div style={{ height: "0.5px", background: "var(--border)", marginBottom: "56px" }} />
 
-        {/* Editorial text — constrained column width */}
         <div style={{ maxWidth: "640px" }}>
           <p
             className="font-cormorant font-light mb-8"
@@ -171,9 +162,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════════════
-          PULLQUOTE
-      ══════════════════════════════════════════════════ */}
       <section
         className="px-8 md:px-16 py-24"
         style={{ borderTop: "0.5px solid var(--border)" }}
@@ -194,9 +182,6 @@ export default function AboutPage() {
         </blockquote>
       </section>
 
-      {/* ══════════════════════════════════════════════════
-          CTA
-      ══════════════════════════════════════════════════ */}
       <section
         className="px-8 md:px-16 pb-24 pt-4"
         style={{ borderTop: "0.5px solid var(--border)" }}
@@ -227,7 +212,6 @@ export default function AboutPage() {
           </Link>
         </div>
       </section>
-
     </div>
   );
 }
