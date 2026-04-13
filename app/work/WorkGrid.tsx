@@ -18,6 +18,7 @@ export default function WorkGrid({ items }: { items: Photo[] }) {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     gsap.registerPlugin(ScrollTrigger);
+    const cleanups: Array<() => void> = [];
 
     const ctx = gsap.context(() => {
       const els = gsap.utils.toArray<HTMLElement>(".work-item");
@@ -41,23 +42,27 @@ export default function WorkGrid({ items }: { items: Photo[] }) {
       );
 
       // Cursor-aware hover: subtle zoom + lightweight frame.
-      const cleanups: Array<() => void> = [];
       els.forEach((item) => {
         const img = item.querySelector("img");
         const frame = item.querySelector<HTMLElement>(".work-frame");
+        let rafId: number | null = null;
+        let x = 50;
+        let y = 50;
 
-        const handleMove = (e: MouseEvent) => {
+        const updateOrigin = () => {
+          if (img) img.style.transformOrigin = `${x}% ${y}%`;
+          rafId = null;
+        };
+
+        const handleMove = (e: PointerEvent) => {
           if (!img) return;
           const rect = item.getBoundingClientRect();
-          const x = ((e.clientX - rect.left) / rect.width) * 100;
-          const y = ((e.clientY - rect.top) / rect.height) * 100;
+          x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+          y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
 
-          gsap.to(img, {
-            transformOrigin: `${x}% ${y}%`,
-            duration: 0.2,
-            ease: "power2.out",
-            overwrite: true,
-          });
+          if (rafId === null) {
+            rafId = requestAnimationFrame(updateOrigin);
+          }
         };
 
         const handleEnter = () => {
@@ -66,27 +71,32 @@ export default function WorkGrid({ items }: { items: Photo[] }) {
         };
 
         const handleLeave = () => {
+          if (rafId !== null) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+          }
           if (img) gsap.to(img, { scale: 1, duration: 0.45, ease: "power2.out" });
+          if (img) img.style.transformOrigin = "50% 50%";
           if (frame) gsap.to(frame, { opacity: 0, duration: 0.2, ease: "power2.in" });
         };
 
-        item.addEventListener("mousemove", handleMove);
-        item.addEventListener("mouseenter", handleEnter);
-        item.addEventListener("mouseleave", handleLeave);
+        item.addEventListener("pointermove", handleMove);
+        item.addEventListener("pointerenter", handleEnter);
+        item.addEventListener("pointerleave", handleLeave);
 
         cleanups.push(() => {
-          item.removeEventListener("mousemove", handleMove);
-          item.removeEventListener("mouseenter", handleEnter);
-          item.removeEventListener("mouseleave", handleLeave);
+          if (rafId !== null) cancelAnimationFrame(rafId);
+          item.removeEventListener("pointermove", handleMove);
+          item.removeEventListener("pointerenter", handleEnter);
+          item.removeEventListener("pointerleave", handleLeave);
         });
       });
-
-      return () => {
-        cleanups.forEach((cleanup) => cleanup());
-      };
     }, gridRef);
 
-    return () => ctx.revert();
+    return () => {
+      cleanups.forEach((cleanup) => cleanup());
+      ctx.revert();
+    };
   }, [items]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (items.length === 0) {
